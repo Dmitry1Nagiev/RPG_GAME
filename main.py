@@ -79,6 +79,8 @@ dt = clock.tick(FPS) / 1000
 
 restart()
 drawMap('game_lvl/Real_world1.txt')
+
+all_sprites.add(player)
 while True:
     clock.tick(FPS)
     for event in pygame.event.get():
