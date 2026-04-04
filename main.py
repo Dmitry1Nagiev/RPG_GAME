@@ -1,3 +1,6 @@
+
+
+
 import pygame
 import sys
 from sprites.sprite_classes import *
@@ -12,6 +15,7 @@ MINIMAP_POS =(10,10)
 
 FPS = 60
 pygame.init()
+#mapFile = ('game_lvl/test1.txt')
 mapFile = ('game_lvl/Real_world1.txt')
 
 window = pygame.display.set_mode((WIDTH,HEIGHT))
@@ -19,6 +23,8 @@ pygame.display.set_caption('RPG')
 clock = pygame.time.Clock()
 from load import *
 
+
+col_red_n = 0
 def drawMinimap():
     global game_map, show_mini_map
 
@@ -48,9 +54,14 @@ def drawMinimap():
                              (px,py,MINIMAP_TILE,MINIMAP_TILE))
 
 
+def redrawMap():
+    global all_sprites , camera
 
-
-
+    player_pos = player.rect.center
+    drawMap()
+    player.rect.center = player_pos
+    player.pos = pygame.Vector2(player_pos)
+    all_sprites.add(player)
 
 
 open_size = 20
@@ -71,10 +82,10 @@ def restart():
     camera = Camera(8000,8000,WIDTH,HEIGHT)
     all_sprites = pygame.sprite.Group()
 def lvlGame():
-    global player_group,player,all_sprites,grass_group,lava_group,rock_group,sand_group,water_group,camera,collision_sprites,blue_cristal_group,red_cristal_group
-    blue_crystals = 0
-    player_group.update(dt,FPS,player_images)
+    global player_group,player,all_sprites,grass_group,lava_group,rock_group,sand_group,water_group,camera,collision_sprites,blue_cristal_group,red_cristal_group,col_red_n,mapFile
 
+    player_group.update(dt,FPS,player_images)
+    blue_crystals = 0
     camera.update(player,window,all_sprites)
     crystal_collected = pygame.sprite.spritecollide(player,blue_cristal_group,True)
     for crystal in crystal_collected:
@@ -82,7 +93,21 @@ def lvlGame():
         i,j = crystal.tile_pos
         game_map[i][j] = '3'
         open_new_area()
-
+    red_cristal_collected = pygame.sprite.spritecollide(player,red_cristal_group,True)
+    for crystal in red_cristal_collected:
+        col_red_n += 1
+        print(col_red_n)
+        i,j = crystal.tile_pos
+        game_map[i][j] = '3'
+        if game_map[i][j] == '3':
+            game_map[i][j] = '1'
+        redrawMap()
+    if col_red_n == 4:
+        for i in range(open_size):
+            for j in range(open_size):
+                if game_map[i][j] == '3':
+                    game_map[i][j] = '1'
+        redrawMap()
 
     if show_mini_map:
         drawMinimap()
@@ -96,8 +121,8 @@ def loadMap(mapFile):
     with open(mapFile,'r') as file:
         for line in file:
             game_map.append(line.replace('/n', '').split(','))
-def drawMap(mapFile):
-    global player_group, player, all_sprites, grass_group, lava_group, rock_group, sand_group, water_group,collision_sprites,blue_cristal_group,red_cristal_group
+def drawMap():
+    global player_group, player, all_sprites, grass_group, lava_group, rock_group, sand_group, water_group,collision_sprites,blue_cristal_group,red_cristal_group,game_map
 
     all_sprites.empty()
     grass_group.empty()
@@ -153,7 +178,7 @@ def open_new_area():
     global open_size , all_sprites, camera
     open_size += 20
     player_pos = player.rect.center
-    drawMap('game_lvl/Real_world1.txt')
+    drawMap()
     player.rect.center = player_pos
     player_pos = pygame.Vector2(player_pos)
     all_sprites.add(player)
@@ -164,8 +189,8 @@ dt = clock.tick(FPS) / 1000
 
 
 restart()
-loadMap('game_lvl/Real_world1.txt')
-drawMap(mapFile)
+loadMap(mapFile)
+drawMap()
 
 all_sprites.add(player)
 
