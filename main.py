@@ -3,6 +3,9 @@
 
 import pygame
 import sys
+
+import pygwidgets
+
 from sprites.sprite_classes import *
 from camera import Camera
 BLACK = (0,0,0)
@@ -15,8 +18,8 @@ MINIMAP_POS =(10,10)
 
 FPS = 60
 pygame.init()
-#mapFile = ('game_lvl/test1.txt')
-mapFile = ('game_lvl/Real_world1.txt')
+mapFile = ('game_lvl/test1.txt')
+#mapFile = ('game_lvl/Real_world1.txt')
 
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption('RPG')
@@ -83,7 +86,11 @@ def restart():
     all_sprites = pygame.sprite.Group()
 def lvlGame():
     global player_group,player,all_sprites,grass_group,lava_group,rock_group,sand_group,water_group,camera,collision_sprites,blue_cristal_group,red_cristal_group,col_red_n,mapFile
-
+    complt_text = pygwidgets.DisplayText(window, (500, 200),
+                                         'COMPLETED', 'Comic Sans',
+                                         fontSize=40,
+                                         textColor=(0, 220, 0))
+    pon = False
     player_group.update(dt,FPS,player_images)
     blue_crystals = 0
     camera.update(player,window,all_sprites)
@@ -102,13 +109,22 @@ def lvlGame():
         if game_map[i][j] == '3':
             game_map[i][j] = '1'
         redrawMap()
+
     if col_red_n == 4:
         for i in range(open_size):
             for j in range(open_size):
                 if game_map[i][j] == '3':
                     game_map[i][j] = '1'
-        redrawMap()
+                    pon = True
 
+        redrawMap()
+    lava_toche = pygame.sprite.spritecollide(player,lava_group,False)
+    #for lava in lava_toche:
+        #player_group.empty()
+        #loadMap(mapFile)
+        #drawMap()
+    if pon == True:
+        complt_text.draw()
     if show_mini_map:
         drawMinimap()
     pygame.display.update()
